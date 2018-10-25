@@ -24,9 +24,14 @@ namespace Temperatures.Controllers
 
         // GET api/temperatures
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Temperature>>> Get(CancellationToken cancellationToken)
+        public async Task<ActionResult<IEnumerable<Temperature>>> Get([FromQuery] DateTimeOffset? from, [FromQuery] DateTimeOffset? to, CancellationToken cancellationToken)
         {
-            var temperatures = await entities.Temperatures.Take(10).ToListAsync(cancellationToken);
+            var temperaturesQuery = entities.Temperatures.AsQueryable();
+            if (from.HasValue)
+                temperaturesQuery = temperaturesQuery.Where(t => t.When >= from);
+            if (to.HasValue)
+                temperaturesQuery = temperaturesQuery.Where(t => t.When < to);
+            var temperatures = await temperaturesQuery.ToListAsync(cancellationToken);
             return temperatures;
         }
 
@@ -34,7 +39,7 @@ namespace Temperatures.Controllers
         [HttpPost("{id}/note")]
         public async Task<ActionResult> Post([FromRoute] int id, [FromBody] UpdateNoteRequest model, CancellationToken cancellationToken)
         {
-            var temperature = await entities.Temperatures.SingleOrDefaultAsync(t=>t.Id == id, cancellationToken);
+            var temperature = await entities.Temperatures.SingleOrDefaultAsync(t => t.Id == id, cancellationToken);
             if (temperature == null) return NotFound();
             temperature.Note = model.Value;
             await entities.SaveChangesAsync(cancellationToken);
