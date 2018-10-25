@@ -14,6 +14,10 @@ namespace Service.Entities
 
         [Required]
         public DateTimeOffset When { get; set; }
+
+        [Required]
+        public decimal ValueInCelsius { get; set; }
+
         public string Note { get; set; }
     }
 }

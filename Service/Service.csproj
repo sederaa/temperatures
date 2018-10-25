@@ -15,5 +15,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="Class1.cs" />
+    <Compile Remove="Migrations\20181025071638_InitialData.cs" />
+    <Compile Remove="Migrations\20181025071638_InitialData.Designer.cs" />
   </ItemGroup>
 </Project>
