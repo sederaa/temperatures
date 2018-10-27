@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Service;
-using Service.Entities;
+﻿using System.Collections.Generic;
 using System.Threading;
-using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 using Api.Models;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using Service.Models;
+using Service.Queries;
 
 namespace Temperatures.Controllers
 {
@@ -15,23 +13,18 @@ namespace Temperatures.Controllers
     [ApiController]
     public class TemperaturesController : ControllerBase
     {
-        private readonly EntitiesContext entities;
+        private readonly IMediator mediator;
 
-        public TemperaturesController(EntitiesContext entities)
+        public TemperaturesController(IMediator mediator)
         {
-            this.entities = entities;
+            this.mediator = mediator;
         }
 
         // GET api/temperatures
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Temperature>>> Get([FromQuery] DateTimeOffset? from, [FromQuery] DateTimeOffset? to, CancellationToken cancellationToken)
+        public async Task<ActionResult<List<TemperatureResponse>>> Get([FromQuery] TemperaturesQuery query, CancellationToken cancellationToken)
         {
-            var temperaturesQuery = entities.Temperatures.AsQueryable();
-            if (from.HasValue)
-                temperaturesQuery = temperaturesQuery.Where(t => t.When >= from);
-            if (to.HasValue)
-                temperaturesQuery = temperaturesQuery.Where(t => t.When < to);
-            var temperatures = await temperaturesQuery.ToListAsync(cancellationToken);
+            var temperatures = await mediator.Send(query, cancellationToken);
             return temperatures;
         }
 
@@ -39,10 +32,8 @@ namespace Temperatures.Controllers
         [HttpPost("{id}/note")]
         public async Task<ActionResult> Post([FromRoute] int id, [FromBody] UpdateNoteRequest model, CancellationToken cancellationToken)
         {
-            var temperature = await entities.Temperatures.SingleOrDefaultAsync(t => t.Id == id, cancellationToken);
-            if (temperature == null) return NotFound();
-            temperature.Note = model.Value;
-            await entities.SaveChangesAsync(cancellationToken);
+            var command = new TemperatureNoteUpdateCommand { Id = id, Note = model.Value };
+            await mediator.Send(command, cancellationToken);
             return Ok();
         }
 
