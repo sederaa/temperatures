@@ -12,8 +12,14 @@ class TemperaturesApi {
         }
     }
 
-    test(){
-console.log("TemperaturesApi.test");
+    async updateNote(id, note){
+        try {
+            await axios.post(`/api/temperatures/${id}/note`, {
+                value: note
+            });
+        } catch (error) {
+            console.error(error);
+        }
     }
 }
 

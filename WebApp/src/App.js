@@ -23,6 +23,7 @@ class App extends Component {
     this.handleDateChangeStart = this.handleDateChangeStart.bind(this);
     this.handleDateChangeEnd = this.handleDateChangeEnd.bind(this);
     this.fetchData = this.fetchData.bind(this);
+    this.handleUpdateNote = this.handleUpdateNote.bind(this);
     this._temperaturesApi = new TemperaturesApi();
   }
 
@@ -62,6 +63,16 @@ class App extends Component {
     }, () => {
       this.fetchData();
     });
+  }
+
+  async handleUpdateNote(id, note) {
+    console.log(`App.handleUpdateNote: id = ${id}, note = ${note}.`)
+    try {
+      await this._temperaturesApi.updateNote(id, note);
+      await this.fetchData();
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   render() {
@@ -119,7 +130,7 @@ class App extends Component {
           <TabPane tabId="1">
             <Row>
               <Col sm="12">
-                <TemperaturesTable temperatures={this.state.temperatures} />
+                <TemperaturesTable temperatures={this.state.temperatures} updateNote={this.handleUpdateNote} />
               </Col>
             </Row>
           </TabPane>

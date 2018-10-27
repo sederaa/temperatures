@@ -20,3 +20,9 @@ table.temperatures-table th,
 table.temperatures-table td {
   text-align: left;
 }
+
+img.edit-icon {
+  height: 0.8em;
+  width: 0.8em;
+  cursor: hand;
+}
