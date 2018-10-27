@@ -1,30 +1,42 @@
 import React, { Component } from 'react';
 import './App.css';
-import { TabContent, TabPane, Nav, NavItem, NavLink, Card, Button, CardTitle, CardText, Row, Col, Form, FormGroup, Label, Table } from 'reactstrap';
+import { TabContent, TabPane, Nav, NavItem, NavLink, Row, Col, Form, FormGroup, Label } from 'reactstrap';
 import classnames from 'classnames';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import moment from 'moment';
-
+import TemperaturesApi from './api/temperaturesApi';
+import TemperaturesTable from './components/temperaturesTable';
 
 class App extends Component {
   constructor(props) {
     super(props);
 
-    this.toggle = this.toggle.bind(this);
     this.state = {
       activeTab: '1',
       startDate: moment().subtract(7, 'days'),
       endDate: moment(),
-      temperatures: [
-        { When: moment(), ValueInCelsius: 23, Note: "Hello World!" },
-      { When: moment(), ValueInCelsius: 23, Note: "Hello World!" },
-      { When: moment(), ValueInCelsius: 23, Note: "Hello World!" }
-    ]
+      temperatures: []
     };
     this.toggle = this.toggle.bind(this);
     this.handleDateChangeStart = this.handleDateChangeStart.bind(this);
     this.handleDateChangeEnd = this.handleDateChangeEnd.bind(this);
+    this.fetchData = this.fetchData.bind(this);
+    this._temperaturesApi = new TemperaturesApi();
+  }
+
+  async componentDidMount() {
+    await this.fetchData();
+  }
+
+  async fetchData() {
+    try {
+      let data = await this._temperaturesApi.query(this.state.startDate.format(), this.state.endDate.format());
+      this.setState({ temperatures: data });
+    } catch (error) {
+      console.error(error);
+    }
+
   }
 
   toggle(tab) {
@@ -38,12 +50,16 @@ class App extends Component {
   handleDateChangeStart(date) {
     this.setState({
       startDate: date
+    }, () => {
+      this.fetchData();
     });
   }
 
   handleDateChangeEnd(date) {
     this.setState({
       endDate: date
+    }, () => {
+      this.fetchData();
     });
   }
 
@@ -102,25 +118,7 @@ class App extends Component {
           <TabPane tabId="1">
             <Row>
               <Col sm="12">
-                {this.state.temperatures.length > 0
-                  ?
-                  <Table striped hover size="sm" className="temperatures-table">
-                    <thead>
-                      <tr>
-                        <th>Date &amp; Time</th>
-                        <th>Value (°C)</th>
-                        <th>Notes</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {this.state.temperatures.map(t => <tr>
-                        <td>{t.When.fromNow()} ({t.When.format("D MMM YYYY h:mm:A")})</td>
-                        <td>{t.ValueInCelsius}</td>
-                        <td>{t.Notes}</td>
-                      </tr>)}
-                    </tbody>
-                  </Table>
-                  : <p>No temperatures found for this date range.</p>}
+                <TemperaturesTable temperatures={this.state.temperatures} />
               </Col>
             </Row>
           </TabPane>
