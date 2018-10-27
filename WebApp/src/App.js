@@ -7,6 +7,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import moment from 'moment';
 import TemperaturesApi from './api/temperaturesApi';
 import TemperaturesTable from './components/temperaturesTable';
+import TemperaturesChart from './components/temperaturesChart';
 
 class App extends Component {
   constructor(props) {
@@ -125,7 +126,7 @@ class App extends Component {
           <TabPane tabId="2">
             <Row>
               <Col sm="12">
-                Tab 2
+                <TemperaturesChart temperatures={this.state.temperatures} />
               </Col>
             </Row>
           </TabPane>

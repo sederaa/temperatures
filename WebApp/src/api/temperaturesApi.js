@@ -6,7 +6,6 @@ class TemperaturesApi {
             const response = await axios.get('/api/temperatures', {
                 params: { from, to }
             });
-            console.log(response.data);
             return response.data;
         } catch (error) {
             console.error(error);
